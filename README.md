@@ -24,6 +24,32 @@ vidtoolz install vidtoolz-add-text
 
 type ``vid addtext --help`` to get help
 
+```bash
+usage: vid addtext [-h] [-o OUTPUT]
+                   [-p {top-left,top-right,bottom-left,bottom-right,center,bottom}]
+                   [-st START_TIME] [-et END_TIME] [-f FONTSIZE]
+                   main_video text
+
+Add text to a video file
+
+positional arguments:
+  main_video            Path to the main video file.
+  text                  Text to write
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -o OUTPUT, --output OUTPUT
+                        Output video file name (default: output.mp4)
+  -p {top-left,top-right,bottom-left,bottom-right,center,bottom}, --position {top-left,top-right,bottom-left,bottom-right,center,bottom}
+                        Position of the text (default: bottom)
+  -st START_TIME, --start-time START_TIME
+                        Start time when text should appear
+  -et END_TIME, --end-time END_TIME
+                        End time when text should disappear
+  -f FONTSIZE, --fontsize FONTSIZE
+                        Fontsize default:50
+
+```
 
 
 ## Development
