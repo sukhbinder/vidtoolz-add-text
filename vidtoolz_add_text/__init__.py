@@ -58,7 +58,7 @@ class ViztoolzPlugin:
         self.parser.set_defaults(func=self.run)
 
     def run(self, args):
-        clip = add_text_to_video(
+        clip , fps = add_text_to_video(
             args.main_video,
             args.text,
             args.start_time,
@@ -66,7 +66,7 @@ class ViztoolzPlugin:
             args.position,
             args.fontsize,
         )
-        write_file(clip, args.output)
+        write_file(clip, args.output, fps)
 
     def hello(self, args):
         # this routine will be called when "vidtoolz "addtext is called."
