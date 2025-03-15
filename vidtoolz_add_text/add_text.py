@@ -1,5 +1,5 @@
 import sys
-from moviepy import VideoFileClip, TextClip, CompositeVideoClip
+from moviepy import VideoFileClip, TextClip, CompositeVideoClip, vfx
 
 POSITION_MAP = {
     "top-left": ("left", "top"),
@@ -23,7 +23,7 @@ def add_text_to_video(
     try:
         # Create a text clip using a common system font.
         txt_clip = TextClip(
-            font="DejaVu-Sans",
+            font="Courier",
             text=text,
             font_size=fontsize,
             # bg_color=color,
@@ -48,6 +48,8 @@ def add_text_to_video(
         )
     except Exception as e:
         sys.exit("Error setting properties on text clip: " + str(e))
+
+    txt_clip = txt_clip.with_effects([vfx.CrossFadeIn(0.5), vfx.CrossFadeOut(0.5)])
 
     try:
         # Overlay the text clip on the video
