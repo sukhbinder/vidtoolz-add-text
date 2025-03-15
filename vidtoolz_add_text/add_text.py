@@ -22,7 +22,7 @@ def add_text_to_video(
 
     try:
         here = os.path.dirname(__file__)
-        font=os.path.join(here, "fonts", "Raleway-Bold.ttf")
+        font=os.path.join(here, "fonts", "SEASRN.ttf")
         # Create a text clip using a common system font.
         txt_clip = TextClip(
             font=font,
