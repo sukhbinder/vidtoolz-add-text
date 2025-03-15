@@ -23,7 +23,7 @@ def add_text_to_video(
     try:
         # Create a text clip using a common system font.
         txt_clip = TextClip(
-            font="Arial",
+            font="Courier",
             text=text,
             font_size=fontsize,
             # bg_color=color,
