@@ -21,7 +21,7 @@ def add_text_to_video(
         sys.exit("Error loading video file: " + str(e))
 
     try:
-        font = "/fonts/LucidaGrande.ttc"
+        font = "/fonts/Raleway-Bold.ttf"
         # Create a text clip using a common system font.
         txt_clip = TextClip(
             font=font,
