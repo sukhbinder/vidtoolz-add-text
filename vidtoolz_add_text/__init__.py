@@ -23,7 +23,7 @@ def create_parser(subparser):
     parser.add_argument(
         "-o",
         "--output",
-        default="output.mp4",
+        default=None,
         help="Output video file name (default: output.mp4)",
     )
     parser.add_argument(

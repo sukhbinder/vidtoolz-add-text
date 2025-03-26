@@ -21,8 +21,7 @@ def test_create_parser():
     assert result.end_time == 7
     assert result.fontsize == 100
     assert result.position == "bottom"
-    assert result.output == "output.mp4"
-
+    assert result.output is None
 
 def test_plugin(capsys):
     w.addtext_plugin.hello(None)
