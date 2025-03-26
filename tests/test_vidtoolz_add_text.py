@@ -23,6 +23,7 @@ def test_create_parser():
     assert result.position == "bottom"
     assert result.output is None
 
+
 def test_plugin(capsys):
     w.addtext_plugin.hello(None)
     captured = capsys.readouterr()
