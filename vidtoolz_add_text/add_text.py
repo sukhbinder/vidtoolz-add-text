@@ -1,4 +1,4 @@
-import sys,os
+import sys, os
 from moviepy import VideoFileClip, TextClip, CompositeVideoClip, vfx
 
 POSITION_MAP = {
@@ -22,7 +22,7 @@ def add_text_to_video(
 
     try:
         here = os.path.dirname(__file__)
-        font=os.path.join(here, "fonts", "SEASRN.ttf")
+        font = os.path.join(here, "fonts", "SEASRN.ttf")
         # Create a text clip using a common system font.
         txt_clip = TextClip(
             font=font,

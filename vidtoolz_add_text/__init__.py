@@ -1,5 +1,19 @@
 import vidtoolz
+import os
 from vidtoolz_add_text.add_text import add_text_to_video, write_file
+
+
+def determine_output_path(input_file, output_file):
+    input_dir, input_filename = os.path.split(input_file)
+    name, _ = os.path.splitext(input_filename)
+
+    if output_file:
+        output_dir, output_filename = os.path.split(output_file)
+        if not output_dir:  # If no directory is specified, use input file's directory
+            return os.path.join(input_dir, output_filename)
+        return output_file
+    else:
+        return os.path.join(input_dir, f"{name}_text.mp4")
 
 
 def create_parser(subparser):
@@ -37,7 +51,7 @@ def create_parser(subparser):
         "-et",
         "--end-time",
         type=float,
-        default=2,
+        default=4,
         help="End time when text should disappear",
     )
     parser.add_argument(
@@ -58,7 +72,9 @@ class ViztoolzPlugin:
         self.parser.set_defaults(func=self.run)
 
     def run(self, args):
-        clip , fps = add_text_to_video(
+
+        output = determine_output_path(args.main_video, args.output)
+        clip, fps = add_text_to_video(
             args.main_video,
             args.text,
             args.start_time,
@@ -66,7 +82,7 @@ class ViztoolzPlugin:
             args.position,
             args.fontsize,
         )
-        write_file(clip, args.output, fps)
+        write_file(clip, output, fps)
 
     def hello(self, args):
         # this routine will be called when "vidtoolz "addtext is called."

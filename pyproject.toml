@@ -1,6 +1,6 @@
 [project]
 name = "vidtoolz-add-text"
-version = "0.0.1"
+version = "0.0.2"
 description = "Add text to a video file"
 readme = "README.md"
 authors = [{name = "Sukhbinder Singh"}]
