@@ -7,6 +7,8 @@
 
 Add text to a video file
 
+![Demo](https://raw.githubusercontent.com/sukhbinder/vidtoolz-add-text/refs/heads/main/demo.png)
+
 ## Installation
 
 First install [vidtoolz](https://github.com/sukhbinder/vidtoolz).
