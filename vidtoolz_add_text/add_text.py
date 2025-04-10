@@ -1,5 +1,6 @@
 import sys, os
 from moviepy import VideoFileClip, TextClip, CompositeVideoClip, vfx
+from pathlib import Path
 
 POSITION_MAP = {
     "top-left": ("left", "top"),
@@ -12,13 +13,24 @@ POSITION_MAP = {
 
 
 def add_text_to_video(
-    input_video_path, text, start_time, end_time, position, fontsize=50
+    input_video_path, text, start_time, end_time, position, fontsize=50, padding=50
 ):
+    # Input Validation
+    if not Path(input_video_path).exists():
+        sys.exit(f"Error: Video file not found: {input_video_path}")
+    if not text:
+        sys.exit("Error: Text cannot be empty.")
+    if start_time < 0 or end_time < 0 or end_time <= start_time:
+        sys.exit("Error: Invalid start or end time.")
+    if fontsize <= 0:
+        sys.exit("Error: Font size must be positive")
+    if not position in POSITION_MAP:
+        sys.exit("Error: Invalid position specified.")
+
     try:
-        # Load the original video
         video = VideoFileClip(input_video_path)
     except Exception as e:
-        sys.exit("Error loading video file: " + str(e))
+        sys.exit(f"Error loading video file: {e}")
 
     try:
         here = os.path.dirname(__file__)
@@ -34,8 +46,8 @@ def add_text_to_video(
             stroke_width=2,
             stroke_color="black",
             color="white",
+            margin=(padding, padding),
         )
-        # text, fontsize=fontsize, color='white', font='Arial')
     except Exception as e:
         sys.exit("Error creating text clip: " + str(e))
 

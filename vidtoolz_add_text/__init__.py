@@ -44,8 +44,8 @@ def create_parser(subparser):
         "-st",
         "--start-time",
         type=float,
-        default=2,
-        help="Start time when text should appear",
+        default=0,
+        help="Start time when text should appear: default 0",
     )
     parser.add_argument(
         "-et",
@@ -56,6 +56,10 @@ def create_parser(subparser):
     )
     parser.add_argument(
         "-f", "--fontsize", type=int, default=50, help="Fontsize default:50"
+    )
+
+    parser.add_argument(
+        "-pad", "--padding", type=int, default=50, help="Padding default:50"
     )
 
     return parser
@@ -81,6 +85,7 @@ class ViztoolzPlugin:
             args.end_time,
             args.position,
             args.fontsize,
+            args.padding,
         )
         write_file(clip, output, fps)
 

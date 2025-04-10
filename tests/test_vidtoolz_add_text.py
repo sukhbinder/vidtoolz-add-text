@@ -22,6 +22,7 @@ def test_create_parser():
     assert result.fontsize == 100
     assert result.position == "bottom"
     assert result.output is None
+    assert result.padding == 50
 
 
 def test_plugin(capsys):
@@ -49,11 +50,10 @@ def test_add_text_to_video():
 
 def test_add_text_to_video_invalid_position():
     # Test adding text to a video with an invalid position
-    video_with_text, fps = add_text_to_video(
-        TEST_VIDEO_FILE, "Test text", 0, 5, "invalid-position"
-    )
-    assert video_with_text is not None
-    assert fps > 0
+    with pytest.raises(SystemExit):
+        video_with_text, fps = add_text_to_video(
+            TEST_VIDEO_FILE, "Test text", 0, 5, "invalid-position"
+        )
 
 
 def test_write_file():
@@ -88,7 +88,7 @@ def test_add_text_to_video_invalid_text():
 
 def test_add_text_to_video_invalid_fontsize():
     # Test adding text to a video with an invalid font size
-    with pytest.raises(SystemExit):
+    with pytest.raises(TypeError):
         add_text_to_video(
             TEST_VIDEO_FILE, "Test text", 0, 5, "center", fontsize="invalid"
         )
@@ -96,13 +96,13 @@ def test_add_text_to_video_invalid_fontsize():
 
 def test_add_text_to_video_invalid_start_time():
     # Test adding text to a video with an invalid start time
-    with pytest.raises(SystemExit):
+    with pytest.raises(TypeError):
         add_text_to_video(TEST_VIDEO_FILE, "Test text", "invalid", 5, "center")
 
 
 def test_add_text_to_video_invalid_end_time():
     # Test adding text to a video with an invalid end time
-    with pytest.raises(SystemExit):
+    with pytest.raises(TypeError):
         add_text_to_video(TEST_VIDEO_FILE, "Test text", 0, "invalid", "center")
 
 
