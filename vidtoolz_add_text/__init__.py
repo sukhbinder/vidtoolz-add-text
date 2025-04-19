@@ -24,7 +24,7 @@ def create_parser(subparser):
         "-o",
         "--output",
         default=None,
-        help="Output video file name (default: output.mp4)",
+        help="Output video file name (default: %(default)s)",
     )
     parser.add_argument(
         "-p",
@@ -38,28 +38,28 @@ def create_parser(subparser):
             "bottom",
         ],
         default="bottom",
-        help="Position of the text (default: bottom)",
+        help="Position of the text (default: %(default)s)",
     )
     parser.add_argument(
         "-st",
         "--start-time",
         type=float,
         default=0,
-        help="Start time when text should appear: default 0",
+        help="Start time when text should appear: (default: %(default)s)",
     )
     parser.add_argument(
         "-et",
         "--end-time",
         type=float,
         default=4,
-        help="End time when text should disappear",
+        help="End time when text should disappear. (default: %(default)s)",
     )
     parser.add_argument(
-        "-f", "--fontsize", type=int, default=50, help="Fontsize default:50"
+        "-f", "--fontsize", type=int, default=50, help="Fontsize (default: %(default)s)"
     )
 
     parser.add_argument(
-        "-pad", "--padding", type=int, default=50, help="Padding default:50"
+        "-pad", "--padding", type=int, default=50, help="Padding (default: %(default)s)"
     )
 
     return parser
