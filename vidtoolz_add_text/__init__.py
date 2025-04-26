@@ -65,7 +65,7 @@ def create_parser(subparser):
     parser.add_argument(
         "-d",
         "--duration",
-        type=int,
+        type=float,
         default=4,
         help="Duration in seconds (default: %(default)s)",
     )
