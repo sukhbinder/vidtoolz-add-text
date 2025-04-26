@@ -23,6 +23,7 @@ def test_create_parser():
     assert result.position == "bottom"
     assert result.output is None
     assert result.padding == 50
+    assert result.duration == 4
 
 
 def test_plugin(capsys):

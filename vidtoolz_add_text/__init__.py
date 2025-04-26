@@ -51,7 +51,7 @@ def create_parser(subparser):
         "-et",
         "--end-time",
         type=float,
-        default=4,
+        default=None,
         help="End time when text should disappear. (default: %(default)s)",
     )
     parser.add_argument(
@@ -60,6 +60,14 @@ def create_parser(subparser):
 
     parser.add_argument(
         "-pad", "--padding", type=int, default=50, help="Padding (default: %(default)s)"
+    )
+
+    parser.add_argument(
+        "-d",
+        "--duration",
+        type=int,
+        default=4,
+        help="Duration in seconds (default: %(default)s)",
     )
 
     return parser
@@ -86,6 +94,7 @@ class ViztoolzPlugin:
             args.position,
             args.fontsize,
             args.padding,
+            args.duration,
         )
         write_file(clip, output, fps)
 

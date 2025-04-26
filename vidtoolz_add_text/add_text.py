@@ -13,8 +13,17 @@ POSITION_MAP = {
 
 
 def add_text_to_video(
-    input_video_path, text, start_time, end_time, position, fontsize=50, padding=50
+    input_video_path,
+    text,
+    start_time,
+    end_time,
+    position,
+    fontsize=50,
+    padding=50,
+    duration=4,
 ):
+    if end_time is None:
+        end_time = start_time + duration
     # Input Validation
     if not Path(input_video_path).exists():
         sys.exit(f"Error: Video file not found: {input_video_path}")

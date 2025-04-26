@@ -30,6 +30,7 @@ type ``vid addtext --help`` to get help
 usage: vid addtext [-h] [-o OUTPUT]
                    [-p {top-left,top-right,bottom-left,bottom-right,center,bottom}]
                    [-st START_TIME] [-et END_TIME] [-f FONTSIZE]
+                   [-pad PADDING] [-d DURATION]
                    main_video text
 
 Add text to a video file
@@ -41,15 +42,20 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -o OUTPUT, --output OUTPUT
-                        Output video file name (default: output.mp4)
+                        Output video file name (default: None)
   -p {top-left,top-right,bottom-left,bottom-right,center,bottom}, --position {top-left,top-right,bottom-left,bottom-right,center,bottom}
                         Position of the text (default: bottom)
   -st START_TIME, --start-time START_TIME
-                        Start time when text should appear
+                        Start time when text should appear: (default: 0)
   -et END_TIME, --end-time END_TIME
-                        End time when text should disappear
+                        End time when text should disappear. (default: None)
   -f FONTSIZE, --fontsize FONTSIZE
-                        Fontsize default:50
+                        Fontsize (default: 50)
+  -pad PADDING, --padding PADDING
+                        Padding (default: 50)
+  -d DURATION, --duration DURATION
+                        Duration in seconds (default: 4)
+
 
 ```
 
