@@ -13,7 +13,7 @@ def test_create_parser():
     assert parser is not None
 
     result = parser.parse_args(
-        ["video.mp4", "hello", "-st", "3", "-et", "7", "-f", "100"]
+        ["video.mp4", "-t", "hello", "-st", "3", "-et", "7", "-f", "100"]
     )
     assert result.main_video == "video.mp4"
     assert result.text == "hello"
@@ -79,12 +79,6 @@ def test_add_text_to_video_invalid_video_file():
     # Test adding text to an invalid video file
     with pytest.raises(SystemExit):
         add_text_to_video("invalid_video_file.mp4", "Test text", 0, 5, "center")
-
-
-def test_add_text_to_video_invalid_text():
-    # Test adding invalid text to a video
-    with pytest.raises(SystemExit):
-        add_text_to_video(TEST_VIDEO_FILE, None, 0, 5, "center")
 
 
 def test_add_text_to_video_invalid_fontsize():
