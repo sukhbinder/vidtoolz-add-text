@@ -27,20 +27,23 @@ vidtoolz install vidtoolz-add-text
 type ``vid addtext --help`` to get help
 
 ```bash
-usage: vid addtext [-h] [-o OUTPUT]
+usage: vid addtext [-h] [-t TEXT] [-mt MULTI_TEXT] [-o OUTPUT]
                    [-p {top-left,top-right,bottom-left,bottom-right,center,bottom}]
                    [-st START_TIME] [-et END_TIME] [-f FONTSIZE]
                    [-pad PADDING] [-d DURATION]
-                   main_video text
+                   main_video
 
 Add text to a video file
 
 positional arguments:
   main_video            Path to the main video file.
-  text                  Text to write
 
 optional arguments:
   -h, --help            show this help message and exit
+  -t TEXT, --text TEXT  Text to write
+  -mt MULTI_TEXT, --multi-text MULTI_TEXT
+                        Multi-text in format "text,start,duration". Can be
+                        used multiple times. ex "hello,1:20,10"
   -o OUTPUT, --output OUTPUT
                         Output video file name (default: None)
   -p {top-left,top-right,bottom-left,bottom-right,center,bottom}, --position {top-left,top-right,bottom-left,bottom-right,center,bottom}
@@ -55,6 +58,7 @@ optional arguments:
                         Padding (default: 50)
   -d DURATION, --duration DURATION
                         Duration in seconds (default: 4)
+
 
 
 ```
