@@ -26,6 +26,47 @@ def parse_multitext_args(multitext_list):
     return parsed
 
 
+def make_text_clip(
+    text,
+    start_time,
+    end_time,
+    font=None,
+    fontsize=50,
+    padding=50,
+    pos_tuple=("center", "bottom"),
+):
+
+    if font is None:
+        here = os.path.dirname(__file__)
+        font = os.path.join(here, "fonts", "SEASRN.ttf")
+
+    try:
+        txt_clip = TextClip(
+            font=font,
+            text=text,
+            font_size=fontsize,
+            stroke_width=2,
+            stroke_color="black",
+            color="white",
+            margin=(padding, padding),
+        )
+    except Exception as e:
+        sys.exit("Error creating text clip: " + str(e))
+
+    try:
+        # Set duration and starting time, and position the text
+        txt_clip = (
+            txt_clip.with_position(pos_tuple)
+            .with_duration(end_time - start_time)
+            .with_start(start_time)
+        )
+    except Exception as e:
+        sys.exit("Error setting properties on text clip: " + str(e))
+
+    txt_clip = txt_clip.with_effects([vfx.CrossFadeIn(0.5), vfx.CrossFadeOut(0.5)])
+    return txt_clip
+
+
 def add_text_to_video(
     input_video_path,
     text,
@@ -57,54 +98,17 @@ def add_text_to_video(
     clips = [video]
     # Convert position string to a tuple
     pos_tuple = POSITION_MAP.get(position, ("center", "bottom"))
-    here = os.path.dirname(__file__)
-    font = os.path.join(here, "fonts", "SEASRN.ttf")
 
     if text:
-        try:
-            txt_clip = TextClip(
-                font=font,
-                text=text,
-                font_size=fontsize,
-                stroke_width=2,
-                stroke_color="black",
-                color="white",
-                margin=(padding, padding),
-            )
-        except Exception as e:
-            sys.exit("Error creating text clip: " + str(e))
-
-        try:
-            # Set duration and starting time, and position the text
-            txt_clip = (
-                txt_clip.with_position(pos_tuple)
-                .with_duration(end_time - start_time)
-                .with_start(start_time)
-            )
-        except Exception as e:
-            sys.exit("Error setting properties on text clip: " + str(e))
-
-        txt_clip = txt_clip.with_effects([vfx.CrossFadeIn(0.5), vfx.CrossFadeOut(0.5)])
+        txt_clip = make_text_clip(
+            text, start_time, end_time, fontsize, padding, pos_tuple
+        )
         clips.append(txt_clip)
 
     if multitexts:
         for mtext, mstart, mduration in parse_multitext_args(multitexts):
-            txt_clip = TextClip(
-                font=font,
-                text=mtext,
-                font_size=fontsize,
-                stroke_width=2,
-                stroke_color="black",
-                color="white",
-                margin=(padding, padding),
-            )
-            txt_clip = (
-                txt_clip.with_position(pos_tuple)
-                .with_duration(mduration)
-                .with_start(mstart)
-            )
-            txt_clip = txt_clip.with_effects(
-                [vfx.CrossFadeIn(0.5), vfx.CrossFadeOut(0.5)]
+            txt_clip = make_text_clip(
+                mtext, mstart, mstart + mduration, fontsize, padding, pos_tuple
             )
             clips.append(txt_clip)
 
