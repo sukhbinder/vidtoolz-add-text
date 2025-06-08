@@ -29,11 +29,12 @@ def parse_multitext_args(multitext_list):
 def make_text_clip(
     text,
     start_time,
-    end_time,
+    duration,
     font=None,
     fontsize=50,
     padding=50,
     pos_tuple=("center", "bottom"),
+    textcolor="white",
 ):
 
     if font is None:
@@ -47,7 +48,7 @@ def make_text_clip(
             font_size=fontsize,
             stroke_width=2,
             stroke_color="black",
-            color="white",
+            color=textcolor,
             margin=(padding, padding),
         )
     except Exception as e:
@@ -57,7 +58,7 @@ def make_text_clip(
         # Set duration and starting time, and position the text
         txt_clip = (
             txt_clip.with_position(pos_tuple)
-            .with_duration(end_time - start_time)
+            .with_duration(duration)
             .with_start(start_time)
         )
     except Exception as e:
@@ -101,14 +102,19 @@ def add_text_to_video(
 
     if text:
         txt_clip = make_text_clip(
-            text, start_time, end_time, fontsize, padding, pos_tuple
+            text,
+            start_time,
+            end_time - start_time,
+            fontsize=fontsize,
+            padding=padding,
+            pos_tuple=pos_tuple,
         )
         clips.append(txt_clip)
 
     if multitexts:
         for mtext, mstart, mduration in parse_multitext_args(multitexts):
             txt_clip = make_text_clip(
-                mtext, mstart, mstart + mduration, fontsize, padding, pos_tuple
+                mtext, mstart, mduration, fontsize, padding, pos_tuple
             )
             clips.append(txt_clip)
 
