@@ -1,5 +1,6 @@
 import pytest
 import vidtoolz_add_text as w
+from unittest.mock import patch
 
 from argparse import ArgumentParser
 from vidtoolz_add_text.add_text import add_text_to_video, write_file
@@ -129,3 +130,33 @@ def teardown_module():
     # Remove the temporary output video file
     if os.path.exists(TEMP_OUTPUT_VIDEO_FILE):
         os.remove(TEMP_OUTPUT_VIDEO_FILE)
+
+
+@pytest.mark.parametrize(
+    "sticker_text, user_stroke_width, expected_stroke_width",
+    [
+        (False, None, 2),  # Default behavior
+        (True, None, 10),  # Sticker mode default
+        (False, 5, 5),  # User-defined stroke_width
+        (True, 3, 3),  # Sticker mode with user-defined stroke_width
+    ],
+)
+@patch("vidtoolz_add_text.add_text.CompositeVideoClip")
+@patch("vidtoolz_add_text.add_text.TextClip")
+def test_stroke_width_logic(
+    mock_text_clip, mock_composite_clip, sticker_text, user_stroke_width, expected_stroke_width
+):
+    """Tests the logic for determining the stroke_width."""
+    add_text_to_video(
+        TEST_VIDEO_FILE,
+        "Test text",
+        start_time=0,
+        end_time=5,
+        position="center",
+        sticker_text=sticker_text,
+        stroke_width=user_stroke_width,
+    )
+
+    # Check that TextClip was called with the correct stroke_width
+    _, kwargs = mock_text_clip.call_args
+    assert kwargs["stroke_width"] == expected_stroke_width

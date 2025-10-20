@@ -79,6 +79,18 @@ def create_parser(subparser):
         help="Duration in seconds (default: %(default)s)",
     )
 
+    parser.add_argument(
+        "--sticker-text",
+        action="store_true",
+        help="Create a sticker-like text with a thicker border.",
+    )
+
+    parser.add_argument(
+        "--stroke-width",
+        type=int,
+        help="Width of the text stroke (outline).",
+    )
+
     return parser
 
 
@@ -110,6 +122,8 @@ class ViztoolzPlugin:
             args.padding,
             args.duration,
             args.multi_text,
+            args.sticker_text,
+            args.stroke_width,
         )
         write_file(clip, output, fps)
 

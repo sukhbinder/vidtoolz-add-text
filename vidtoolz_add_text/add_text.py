@@ -35,18 +35,26 @@ def make_text_clip(
     padding=50,
     pos_tuple=("center", "bottom"),
     textcolor="white",
+    sticker_text=False,
+    stroke_width=None,
 ):
-
     if font is None:
         here = os.path.dirname(__file__)
         font = os.path.join(here, "fonts", "SEASRN.ttf")
+
+    if stroke_width is not None:
+        stroke_width_to_use = stroke_width
+    elif sticker_text:
+        stroke_width_to_use = 10
+    else:
+        stroke_width_to_use = 2
 
     try:
         txt_clip = TextClip(
             font=font,
             text=text,
             font_size=fontsize,
-            stroke_width=2,
+            stroke_width=stroke_width_to_use,
             stroke_color="black",
             color=textcolor,
             margin=(padding, padding),
@@ -78,6 +86,8 @@ def add_text_to_video(
     padding=50,
     duration=4,
     multitexts=None,
+    sticker_text=False,
+    stroke_width=None,
 ):
     if end_time is None:
         end_time = start_time + duration
@@ -108,13 +118,22 @@ def add_text_to_video(
             fontsize=fontsize,
             padding=padding,
             pos_tuple=pos_tuple,
+            sticker_text=sticker_text,
+            stroke_width=stroke_width,
         )
         clips.append(txt_clip)
 
     if multitexts:
         for mtext, mstart, mduration in parse_multitext_args(multitexts):
             txt_clip = make_text_clip(
-                mtext, mstart, mduration, fontsize=fontsize, padding=padding, pos_tuple=pos_tuple
+                mtext,
+                mstart,
+                mduration,
+                fontsize=fontsize,
+                padding=padding,
+                pos_tuple=pos_tuple,
+                sticker_text=sticker_text,
+                stroke_width=stroke_width,
             )
             clips.append(txt_clip)
 
