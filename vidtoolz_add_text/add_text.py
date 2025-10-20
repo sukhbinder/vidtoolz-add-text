@@ -114,7 +114,7 @@ def add_text_to_video(
     if multitexts:
         for mtext, mstart, mduration in parse_multitext_args(multitexts):
             txt_clip = make_text_clip(
-                mtext, mstart, mduration, fontsize, padding, pos_tuple
+                mtext, mstart, mduration, fontsize=fontsize, padding=padding, pos_tuple=pos_tuple
             )
             clips.append(txt_clip)
 
