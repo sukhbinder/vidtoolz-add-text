@@ -1,7 +1,10 @@
-import sys, os
-from moviepy import VideoFileClip, TextClip, CompositeVideoClip, vfx
+import os
+import sys
 from pathlib import Path
+
+from moviepy import CompositeVideoClip, TextClip, VideoFileClip, vfx
 from moviepy.tools import convert_to_seconds
+from vidtoolz_colored_textclip import get_audio_clip
 
 POSITION_MAP = {
     "top-left": ("left", "top"),
@@ -35,18 +38,27 @@ def make_text_clip(
     padding=50,
     pos_tuple=("center", "bottom"),
     textcolor="white",
+    sticker_text=False,
+    stroke_width=None,
 ):
-
+    FADE_DURATION = 0.5
     if font is None:
         here = os.path.dirname(__file__)
         font = os.path.join(here, "fonts", "SEASRN.ttf")
+
+    if stroke_width is not None:
+        stroke_width_to_use = stroke_width
+    elif sticker_text:
+        stroke_width_to_use = 10
+    else:
+        stroke_width_to_use = 2
 
     try:
         txt_clip = TextClip(
             font=font,
             text=text,
             font_size=fontsize,
-            stroke_width=2,
+            stroke_width=stroke_width_to_use,
             stroke_color="black",
             color=textcolor,
             margin=(padding, padding),
@@ -58,13 +70,18 @@ def make_text_clip(
         # Set duration and starting time, and position the text
         txt_clip = (
             txt_clip.with_position(pos_tuple)
-            .with_duration(duration)
-            .with_start(start_time)
+            .with_duration(duration - FADE_DURATION)
+            .with_start(start_time + FADE_DURATION)
         )
     except Exception as e:
         sys.exit("Error setting properties on text clip: " + str(e))
 
-    txt_clip = txt_clip.with_effects([vfx.CrossFadeIn(0.5), vfx.CrossFadeOut(0.5)])
+    txt_clip = txt_clip.with_effects(
+        [vfx.CrossFadeIn(FADE_DURATION), vfx.CrossFadeOut(FADE_DURATION)]
+    )
+    audio_clip = get_audio_clip(duration, 10)
+    txt_clip.with_audio(audio_clip)
+
     return txt_clip
 
 
@@ -78,6 +95,8 @@ def add_text_to_video(
     padding=50,
     duration=4,
     multitexts=None,
+    sticker_text=False,
+    stroke_width=None,
 ):
     if end_time is None:
         end_time = start_time + duration
@@ -108,19 +127,29 @@ def add_text_to_video(
             fontsize=fontsize,
             padding=padding,
             pos_tuple=pos_tuple,
+            sticker_text=sticker_text,
+            stroke_width=stroke_width,
         )
         clips.append(txt_clip)
 
     if multitexts:
         for mtext, mstart, mduration in parse_multitext_args(multitexts):
             txt_clip = make_text_clip(
-                mtext, mstart, mduration, fontsize=fontsize, padding=padding, pos_tuple=pos_tuple
+                mtext,
+                mstart,
+                mduration,
+                fontsize=fontsize,
+                padding=padding,
+                pos_tuple=pos_tuple,
+                sticker_text=sticker_text,
+                stroke_width=stroke_width,
             )
             clips.append(txt_clip)
 
     try:
         # Overlay the text clip on the video
         video_with_text = CompositeVideoClip(clips)
+        video_with_text = video_with_text.with_audio(video.audio)
     except Exception as e:
         sys.exit("Error combining clips: " + str(e))
 
@@ -137,6 +166,8 @@ def write_file(video_with_text, output_video_path, fps):
             audio_codec="aac",
             temp_audiofile="temp_audio.m4a",
             remove_temp=True,
+            threads="auto",
+            preset="veryfast",
         )
     except Exception as e:
         sys.exit("Error writing video file: " + str(e))
