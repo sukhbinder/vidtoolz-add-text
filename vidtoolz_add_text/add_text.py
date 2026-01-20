@@ -248,14 +248,11 @@ def add_text_to_video_ffmpeg(
 
     # multitext
     if multitexts:
-        for item in multitexts:
-            txt, start, dur = item.split(",", 2)
-            start = convert_to_seconds(start)
-            dur = float(dur)
-
+        parsed_multitexts = parse_multitext_args(multitexts)
+        for txt, start, dur in parsed_multitexts:
             filters.append(
                 _drawtext(
-                    text=txt.strip(),
+                    text=txt,
                     start=start,
                     duration=dur,
                     font=font,

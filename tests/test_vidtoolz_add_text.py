@@ -101,6 +101,23 @@ def test_add_text_to_video_invalid_end_time():
         add_text_to_video(TEST_VIDEO_FILE, "Test text", 0, "invalid", "center")
 
 
+def test_add_text_to_video_ffmpeg_multitext():
+    # Test FFmpeg version handles multitext correctly using the same validation as MoviePy
+    from vidtoolz_add_text.add_text import parse_multitext_args
+
+    # This test verifies that the parse_multitext_args function works correctly
+    multitext_input = ['Hello,0,5', 'World,10,3']
+    result = parse_multitext_args(multitext_input)
+
+    assert len(result) == 2
+    assert result[0] == ('Hello', 0.0, 5.0)
+    assert result[1] == ('World', 10.0, 3.0)
+
+    # Test error handling
+    with pytest.raises(SystemExit):
+        parse_multitext_args(['invalid_format'])
+
+
 def test_write_file_invalid_video_with_text():
     # Test writing an invalid video to a file
     with pytest.raises(SystemExit):
