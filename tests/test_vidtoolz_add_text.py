@@ -4,7 +4,9 @@ import vidtoolz_add_text as w
 from argparse import ArgumentParser
 from vidtoolz_add_text.add_text import add_text_to_video, write_file
 import os
+from pathlib import Path
 
+IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
 def test_create_parser():
     subparser = ArgumentParser().add_subparsers()
@@ -146,3 +148,17 @@ def teardown_module():
     # Remove the temporary output video file
     if os.path.exists(TEMP_OUTPUT_VIDEO_FILE):
         os.remove(TEMP_OUTPUT_VIDEO_FILE)
+
+
+@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test doesn't work in Github Actions.")
+def test_realcase_realmultitext(tmpdir):
+    outfile = tmpdir / "test_stitch.mp4"
+    testdata = Path(__file__).parent
+    vidfile = testdata / "test_video.mp4"
+    argv = [str(vidfile), "--ffmpeg","-mt", "this,0,1" ,"-mt", "is,1,1", "-mt", "working,2,1", "-mt", "great,3,1", "-o", str(outfile) ]
+    subparser = ArgumentParser().add_subparsers()
+    parser = w.create_parser(subparser)
+    args = parser.parse_args(argv)
+    args.func = None
+    w.addtext_plugin.run(args)
+    assert outfile.exists()
