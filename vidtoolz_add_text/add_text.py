@@ -3,6 +3,9 @@ from moviepy import VideoFileClip, TextClip, CompositeVideoClip, vfx
 from pathlib import Path
 from moviepy.tools import convert_to_seconds
 
+import subprocess
+import shlex
+
 POSITION_MAP = {
     "top-left": ("left", "top"),
     "top-right": ("right", "top"),
@@ -141,3 +144,145 @@ def write_file(video_with_text, output_video_path, fps):
     except Exception as e:
         sys.exit("Error writing video file: " + str(e))
     video_with_text.close()
+
+
+
+
+POSITION_MAP_FFMPEG = {
+    "top-left": ("10", "10"),
+    "top-right": ("w-text_w-10", "10"),
+    "bottom-left": ("10", "h-text_h-10"),
+    "bottom-right": ("w-text_w-10", "h-text_h-10"),
+    "center": ("(w-text_w)/2", "(h-text_h)/2"),
+    "bottom": ("(w-text_w)/2", "h-text_h-50"),
+}
+
+
+def _alpha_expr(start, duration, fade=0.5):
+    end = start + duration
+    return (
+        f"if(lt(t,{start}),0,"
+        f" if(lt(t,{start+fade}),(t-{start})/{fade},"
+        f"  if(lt(t,{end-fade}),1,"
+        f"   if(lt(t,{end}),({end}-t)/{fade},0))))"
+    )
+
+
+def _drawtext(
+    text,
+    start,
+    duration,
+    font,
+    fontsize,
+    padding,
+    pos,
+    textcolor,
+    stroke_width,
+):
+    x, y = POSITION_MAP_FFMPEG[pos]
+    alpha = _alpha_expr(start, duration)
+
+    return (
+        "drawtext="
+        f"text='{text}':"
+        f"fontfile='{font}':"
+        f"fontsize={fontsize}:"
+        f"fontcolor={textcolor}:"
+        f"borderw={stroke_width}:"
+        f"bordercolor=black:"
+        f"x={x}:y={y}:"
+        f"alpha='{alpha}'"
+    )
+
+
+def add_text_to_video_ffmpeg(
+    input_video_path,
+    output_video_path,
+    text,
+    start_time,
+    end_time=None,
+    position="bottom",
+    fontsize=50,
+    padding=50,
+    duration=4,
+    multitexts=None,
+    sticker_text=False,
+    stroke_width=None,
+    font=None,
+    textcolor="white",
+):
+    """
+    FFmpeg replacement for MoviePy add_text_to_video()
+    """
+
+    input_video_path = Path(input_video_path)
+    if not input_video_path.exists():
+        raise FileNotFoundError(input_video_path)
+
+    if end_time is None:
+        end_time = start_time + duration
+
+    if font is None:
+        font = Path(__file__).parent / "fonts" / "SEASRN.ttf"
+
+    if stroke_width is None:
+        stroke_width = 10 if sticker_text else 2
+
+    filters = []
+
+    # main text
+    if text:
+        filters.append(
+            _drawtext(
+                text=text,
+                start=start_time,
+                duration=end_time - start_time,
+                font=font,
+                fontsize=fontsize,
+                padding=padding,
+                pos=position,
+                textcolor=textcolor,
+                stroke_width=stroke_width,
+            )
+        )
+
+    # multitext
+    if multitexts:
+        for item in multitexts:
+            txt, start, dur = item.split(",", 2)
+            start = convert_to_seconds(start)
+            dur = float(dur)
+
+            filters.append(
+                _drawtext(
+                    text=txt.strip(),
+                    start=start,
+                    duration=dur,
+                    font=font,
+                    fontsize=fontsize,
+                    padding=padding,
+                    pos=position,
+                    textcolor=textcolor,
+                    stroke_width=stroke_width,
+                )
+            )
+
+    vf = ",".join(filters)
+
+    cmd = [
+        "ffmpeg",
+        "-y",
+        "-i",
+        str(input_video_path),
+        "-vf",
+        vf,
+        "-c:v",
+        "libx264",
+        "-preset",
+        "veryfast",
+        "-c:a",
+        "copy",
+        str(output_video_path),
+    ]
+
+    subprocess.run(cmd, check=True)
