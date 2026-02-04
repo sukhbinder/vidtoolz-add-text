@@ -1,6 +1,6 @@
 import vidtoolz
 import os
-from vidtoolz_add_text.add_text import add_text_to_video, write_file
+from vidtoolz_add_text.add_text import add_text_to_video, write_file, add_text_to_video_ffmpeg
 import sys
 
 
@@ -79,6 +79,8 @@ def create_parser(subparser):
         help="Duration in seconds (default: %(default)s)",
     )
 
+    parser.add_argument("--use-moviepy", action="store_true", help="If provided use Moviepy")
+
     return parser
 
 
@@ -100,18 +102,32 @@ class ViztoolzPlugin:
             sys.exit("Error: Use either  --text or --multi-text, should be provided")
 
         output = determine_output_path(args.main_video, args.output)
-        clip, fps = add_text_to_video(
-            args.main_video,
-            args.text,
-            args.start_time,
-            args.end_time,
-            args.position,
-            args.fontsize,
-            args.padding,
-            args.duration,
-            args.multi_text,
-        )
-        write_file(clip, output, fps)
+        if args.use_moviepy:
+            clip, fps = add_text_to_video(
+                args.main_video,
+                args.text,
+                args.start_time,
+                args.end_time,
+                args.position,
+                args.fontsize,
+                args.padding,
+                args.duration,
+                args.multi_text,
+            )
+            write_file(clip, output, fps)
+        else:
+            add_text_to_video_ffmpeg(
+                args.main_video,
+                output,
+                args.text,
+                args.start_time,
+                args.end_time,
+                args.position,
+                args.fontsize,
+                args.padding,
+                args.duration,
+                args.multi_text,
+            )
 
     def hello(self, args):
         # this routine will be called when "vidtoolz "addtext is called."
