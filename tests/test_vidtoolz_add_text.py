@@ -155,7 +155,7 @@ def test_realcase_realmultitext(tmpdir):
     outfile = tmpdir / "test_stitch.mp4"
     testdata = Path(__file__).parent
     vidfile = testdata / "test_video.mp4"
-    argv = [str(vidfile), "--ffmpeg","-mt", "this,0,1" ,"-mt", "is,1,1", "-mt", "working,2,1", "-mt", "great,3,1", "-o", str(outfile) ]
+    argv = [str(vidfile), "-mt", "this,0,1" ,"-mt", "is,1,1", "-mt", "working,2,1", "-mt", "great,3,1", "-o", str(outfile) ]
     subparser = ArgumentParser().add_subparsers()
     parser = w.create_parser(subparser)
     args = parser.parse_args(argv)

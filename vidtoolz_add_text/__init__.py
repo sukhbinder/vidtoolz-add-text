@@ -79,7 +79,7 @@ def create_parser(subparser):
         help="Duration in seconds (default: %(default)s)",
     )
 
-    parser.add_argument("--ffmpeg", action="store_true", help="If provided use ffmpeg")
+    parser.add_argument("--use-moviepy", action="store_true", help="If provided use Moviepy")
 
     return parser
 
@@ -102,7 +102,7 @@ class ViztoolzPlugin:
             sys.exit("Error: Use either  --text or --multi-text, should be provided")
 
         output = determine_output_path(args.main_video, args.output)
-        if not args.ffmpeg:
+        if args.use_moviepy:
             clip, fps = add_text_to_video(
                 args.main_video,
                 args.text,
