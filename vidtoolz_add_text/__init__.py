@@ -1,6 +1,10 @@
 import vidtoolz
 import os
-from vidtoolz_add_text.add_text import add_text_to_video, write_file, add_text_to_video_ffmpeg
+from vidtoolz_add_text.add_text import (
+    add_text_to_video,
+    write_file,
+    add_text_to_video_ffmpeg,
+)
 import sys
 
 
@@ -64,7 +68,11 @@ def create_parser(subparser):
         help="End time when text should disappear. (default: %(default)s)",
     )
     parser.add_argument(
-        "-f", "--fontsize", type=int, default=50, help="Fontsize (default: %(default)s)"
+        "-f",
+        "--fontsize",
+        type=int,
+        default=100,
+        help="Fontsize (default: %(default)s)",
     )
 
     parser.add_argument(
@@ -79,7 +87,9 @@ def create_parser(subparser):
         help="Duration in seconds (default: %(default)s)",
     )
 
-    parser.add_argument("--use-moviepy", action="store_true", help="If provided use Moviepy")
+    parser.add_argument(
+        "--use-moviepy", action="store_true", help="If provided use Moviepy"
+    )
 
     return parser
 

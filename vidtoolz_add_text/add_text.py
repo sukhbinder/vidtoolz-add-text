@@ -6,6 +6,34 @@ from moviepy.tools import convert_to_seconds
 import subprocess
 import shlex
 
+# Ensure FFmpeg is available
+def ensure_ffmpeg_available():
+    """
+    Ensure FFmpeg is available by checking if it's in the system path,
+    and if not, use static-ffmpeg as fallback.
+    """
+    try:
+        # Check if ffmpeg is already available in the system
+        subprocess.run(["ffmpeg", "-version"], 
+                      stdout=subprocess.DEVNULL, 
+                      stderr=subprocess.DEVNULL,
+                      check=True)
+        return True
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        try:
+            # Try to use static-ffmpeg as fallback
+            import static_ffmpeg
+            static_ffmpeg.add_paths()
+            
+            # Verify it worked
+            subprocess.run(["ffmpeg", "-version"], 
+                          stdout=subprocess.DEVNULL, 
+                          stderr=subprocess.DEVNULL,
+                          check=True)
+            return True
+        except Exception as e:
+            sys.exit(f"Error: FFmpeg is not available and static-ffmpeg fallback failed: {e}")
+
 POSITION_MAP = {
     "top-left": ("left", "top"),
     "top-right": ("right", "top"),
@@ -214,6 +242,9 @@ def add_text_to_video_ffmpeg(
     """
     FFmpeg replacement for MoviePy add_text_to_video()
     """
+    
+    # Ensure FFmpeg is available
+    ensure_ffmpeg_available()
 
     input_video_path = Path(input_video_path)
     if not input_video_path.exists():
