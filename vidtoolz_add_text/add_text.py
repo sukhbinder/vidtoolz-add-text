@@ -6,6 +6,7 @@ from moviepy.tools import convert_to_seconds
 import subprocess
 import shlex
 
+
 # Ensure FFmpeg is available
 def ensure_ffmpeg_available():
     """
@@ -14,25 +15,33 @@ def ensure_ffmpeg_available():
     """
     try:
         # Check if ffmpeg is already available in the system
-        subprocess.run(["ffmpeg", "-version"], 
-                      stdout=subprocess.DEVNULL, 
-                      stderr=subprocess.DEVNULL,
-                      check=True)
+        subprocess.run(
+            ["ffmpeg", "-version"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=True,
+        )
         return True
     except (subprocess.CalledProcessError, FileNotFoundError):
         try:
             # Try to use static-ffmpeg as fallback
             import static_ffmpeg
+
             static_ffmpeg.add_paths()
-            
+
             # Verify it worked
-            subprocess.run(["ffmpeg", "-version"], 
-                          stdout=subprocess.DEVNULL, 
-                          stderr=subprocess.DEVNULL,
-                          check=True)
+            subprocess.run(
+                ["ffmpeg", "-version"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                check=True,
+            )
             return True
         except Exception as e:
-            sys.exit(f"Error: FFmpeg is not available and static-ffmpeg fallback failed: {e}")
+            sys.exit(
+                f"Error: FFmpeg is not available and static-ffmpeg fallback failed: {e}"
+            )
+
 
 POSITION_MAP = {
     "top-left": ("left", "top"),
@@ -67,7 +76,6 @@ def make_text_clip(
     pos_tuple=("center", "bottom"),
     textcolor="white",
 ):
-
     if font is None:
         here = os.path.dirname(__file__)
         font = os.path.join(here, "fonts", "SEASRN.ttf")
@@ -145,7 +153,12 @@ def add_text_to_video(
     if multitexts:
         for mtext, mstart, mduration in parse_multitext_args(multitexts):
             txt_clip = make_text_clip(
-                mtext, mstart, mduration, fontsize=fontsize, padding=padding, pos_tuple=pos_tuple
+                mtext,
+                mstart,
+                mduration,
+                fontsize=fontsize,
+                padding=padding,
+                pos_tuple=pos_tuple,
             )
             clips.append(txt_clip)
 
@@ -172,8 +185,6 @@ def write_file(video_with_text, output_video_path, fps):
     except Exception as e:
         sys.exit("Error writing video file: " + str(e))
     video_with_text.close()
-
-
 
 
 POSITION_MAP_FFMPEG = {
@@ -206,8 +217,17 @@ def _drawtext(
     pos,
     textcolor,
     stroke_width,
+    x=None,
+    y=None,
 ):
-    x, y = POSITION_MAP_FFMPEG[pos]
+    default_x, default_y = POSITION_MAP_FFMPEG[pos]
+    # Only override missing values
+    if x is None:
+        x = default_x
+
+    if y is None:
+        y = default_y
+
     alpha = _alpha_expr(start, duration)
 
     return (
@@ -218,7 +238,7 @@ def _drawtext(
         f"fontcolor={textcolor}:"
         f"borderw={stroke_width}:"
         f"bordercolor=black:"
-        f"x={x}:y={y}:"
+        f"x='{x}':y='{y}':"
         f"alpha='{alpha}'"
     )
 
@@ -238,11 +258,13 @@ def add_text_to_video_ffmpeg(
     stroke_width=None,
     font=None,
     textcolor="white",
+    x=None,
+    y=None,
 ):
     """
     FFmpeg replacement for MoviePy add_text_to_video()
     """
-    
+
     # Ensure FFmpeg is available
     ensure_ffmpeg_available()
 
@@ -274,6 +296,8 @@ def add_text_to_video_ffmpeg(
                 pos=position,
                 textcolor=textcolor,
                 stroke_width=stroke_width,
+                x=x,
+                y=y,
             )
         )
 
@@ -292,6 +316,8 @@ def add_text_to_video_ffmpeg(
                     pos=position,
                     textcolor=textcolor,
                     stroke_width=stroke_width,
+                    x=x,
+                    y=y,
                 )
             )
 

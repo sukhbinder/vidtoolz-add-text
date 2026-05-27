@@ -71,7 +71,7 @@ def create_parser(subparser):
         "-f",
         "--fontsize",
         type=int,
-        default=100,
+        default=70,
         help="Fontsize (default: %(default)s)",
     )
 
@@ -89,6 +89,20 @@ def create_parser(subparser):
 
     parser.add_argument(
         "--use-moviepy", action="store_true", help="If provided use Moviepy"
+    )
+
+    parser.add_argument(
+        "-x",
+        "--x",
+        default=None,
+        help="X position of the overlay (can be number or FFmpeg expression, e.g., 'main_w-text_w')",
+    )
+
+    parser.add_argument(
+        "-y",
+        "--y",
+        default=None,
+        help="Y position of the overlay (can be number or FFmpeg expression, e.g., 'main_h-text_h')",
     )
 
     return parser
@@ -127,16 +141,20 @@ class ViztoolzPlugin:
             write_file(clip, output, fps)
         else:
             add_text_to_video_ffmpeg(
-                args.main_video,
-                output,
-                args.text,
-                args.start_time,
-                args.end_time,
-                args.position,
-                args.fontsize,
-                args.padding,
-                args.duration,
-                args.multi_text,
+                input_video_path=args.main_video,
+                output_video_path=output,
+                text=args.text,
+                start_time=args.start_time,
+                end_time=args.end_time,
+                position=args.position,
+                fontsize=args.fontsize,
+                padding=args.padding,
+                duration=args.duration,
+                multitexts=args.multi_text,
+                sticker_text=True,
+                stroke_width=4,
+                x=args.x,
+                y=args.y,
             )
 
     def hello(self, args):
