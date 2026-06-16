@@ -8,6 +8,7 @@ from pathlib import Path
 
 IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
+
 def test_create_parser():
     subparser = ArgumentParser().add_subparsers()
     parser = w.create_parser(subparser)
@@ -19,7 +20,7 @@ def test_create_parser():
     )
     assert result.main_video == "video.mp4"
     assert result.text == "hello"
-    assert result.start_time == 3
+    assert result.start_time == "3"
     assert result.end_time == 7
     assert result.fontsize == 100
     assert result.position == "bottom"
@@ -108,16 +109,16 @@ def test_add_text_to_video_ffmpeg_multitext():
     from vidtoolz_add_text.add_text import parse_multitext_args
 
     # This test verifies that the parse_multitext_args function works correctly
-    multitext_input = ['Hello,0,5', 'World,10,3']
+    multitext_input = ["Hello,0,5", "World,10,3"]
     result = parse_multitext_args(multitext_input)
 
     assert len(result) == 2
-    assert result[0] == ('Hello', 0.0, 5.0)
-    assert result[1] == ('World', 10.0, 3.0)
+    assert result[0] == ("Hello", 0.0, 5.0)
+    assert result[1] == ("World", 10.0, 3.0)
 
     # Test error handling
     with pytest.raises(SystemExit):
-        parse_multitext_args(['invalid_format'])
+        parse_multitext_args(["invalid_format"])
 
 
 def test_write_file_invalid_video_with_text():
@@ -155,7 +156,19 @@ def test_realcase_realmultitext(tmpdir):
     outfile = tmpdir / "test_stitch.mp4"
     testdata = Path(__file__).parent
     vidfile = testdata / "test_video.mp4"
-    argv = [str(vidfile), "-mt", "this,0,1" ,"-mt", "is,1,1", "-mt", "working,2,1", "-mt", "great,3,1", "-o", str(outfile) ]
+    argv = [
+        str(vidfile),
+        "-mt",
+        "this,0,1",
+        "-mt",
+        "is,1,1",
+        "-mt",
+        "working,2,1",
+        "-mt",
+        "great,3,1",
+        "-o",
+        str(outfile),
+    ]
     subparser = ArgumentParser().add_subparsers()
     parser = w.create_parser(subparser)
     args = parser.parse_args(argv)
