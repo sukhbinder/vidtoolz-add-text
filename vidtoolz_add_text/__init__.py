@@ -5,6 +5,7 @@ from vidtoolz_add_text.add_text import (
     write_file,
     add_text_to_video_ffmpeg,
 )
+from moviepy.tools import convert_to_seconds
 import sys
 
 
@@ -56,7 +57,7 @@ def create_parser(subparser):
     parser.add_argument(
         "-st",
         "--start-time",
-        type=float,
+        type=str,
         default=0,
         help="Start time when text should appear: (default: %(default)s)",
     )
@@ -126,11 +127,12 @@ class ViztoolzPlugin:
             sys.exit("Error: Use either  --text or --multi-text, should be provided")
 
         output = determine_output_path(args.main_video, args.output)
+        start_time = convert_to_seconds(args.start_time)
         if args.use_moviepy:
             clip, fps = add_text_to_video(
                 args.main_video,
                 args.text,
-                args.start_time,
+                start_time,
                 args.end_time,
                 args.position,
                 args.fontsize,
@@ -144,7 +146,7 @@ class ViztoolzPlugin:
                 input_video_path=args.main_video,
                 output_video_path=output,
                 text=args.text,
-                start_time=args.start_time,
+                start_time=start_time,
                 end_time=args.end_time,
                 position=args.position,
                 fontsize=args.fontsize,
