@@ -21,7 +21,7 @@ def test_create_parser():
     assert result.main_video == "video.mp4"
     assert result.text == "hello"
     assert result.start_time == "3"
-    assert result.end_time == 7
+    assert result.end_time == "7"
     assert result.fontsize == 100
     assert result.position == "bottom"
     assert result.output is None
