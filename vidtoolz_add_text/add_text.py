@@ -4,7 +4,6 @@ from pathlib import Path
 from moviepy.tools import convert_to_seconds
 
 import subprocess
-import shlex
 
 
 # Ensure FFmpeg is available
@@ -338,5 +337,7 @@ def add_text_to_video_ffmpeg(
         "copy",
         str(output_video_path),
     ]
-
-    subprocess.run(cmd, check=True)
+    try:
+        subprocess.run(cmd, check=True)
+    except subprocess.CalledProcessError as e:
+        sys.exit(f"FFmpeg failed: {e.stderr}")

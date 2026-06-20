@@ -64,7 +64,7 @@ def create_parser(subparser):
     parser.add_argument(
         "-et",
         "--end-time",
-        type=float,
+        type=str,
         default=None,
         help="End time when text should disappear. (default: %(default)s)",
     )
@@ -127,13 +127,20 @@ class ViztoolzPlugin:
             sys.exit("Error: Use either  --text or --multi-text, should be provided")
 
         output = determine_output_path(args.main_video, args.output)
-        start_time = convert_to_seconds(args.start_time)
+        try:
+            start_time = convert_to_seconds(args.start_time)
+            end_time = (
+                convert_to_seconds(args.end_time) if args.end_time is not None else None
+            )
+        except ValueError as e:
+            sys.exit(f"Invalid time format: {e}")
+
         if args.use_moviepy:
             clip, fps = add_text_to_video(
                 args.main_video,
                 args.text,
                 start_time,
-                args.end_time,
+                end_time,
                 args.position,
                 args.fontsize,
                 args.padding,
@@ -147,7 +154,7 @@ class ViztoolzPlugin:
                 output_video_path=output,
                 text=args.text,
                 start_time=start_time,
-                end_time=args.end_time,
+                end_time=end_time,
                 position=args.position,
                 fontsize=args.fontsize,
                 padding=args.padding,
