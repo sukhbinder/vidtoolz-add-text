@@ -1,6 +1,11 @@
 import vidtoolz
 import os
-from vidtoolz_add_text.add_text import add_text_to_video, write_file
+from vidtoolz_add_text.add_text import (
+    add_text_to_video,
+    write_file,
+    add_text_to_video_ffmpeg,
+)
+from moviepy.tools import convert_to_seconds
 import sys
 
 
@@ -52,19 +57,23 @@ def create_parser(subparser):
     parser.add_argument(
         "-st",
         "--start-time",
-        type=float,
+        type=str,
         default=0,
         help="Start time when text should appear: (default: %(default)s)",
     )
     parser.add_argument(
         "-et",
         "--end-time",
-        type=float,
+        type=str,
         default=None,
         help="End time when text should disappear. (default: %(default)s)",
     )
     parser.add_argument(
-        "-f", "--fontsize", type=int, default=50, help="Fontsize (default: %(default)s)"
+        "-f",
+        "--fontsize",
+        type=int,
+        default=70,
+        help="Fontsize (default: %(default)s)",
     )
 
     parser.add_argument(
@@ -77,6 +86,24 @@ def create_parser(subparser):
         type=float,
         default=4,
         help="Duration in seconds (default: %(default)s)",
+    )
+
+    parser.add_argument(
+        "--use-moviepy", action="store_true", help="If provided use Moviepy"
+    )
+
+    parser.add_argument(
+        "-x",
+        "--x",
+        default=None,
+        help="X position of the overlay (can be number or FFmpeg expression, e.g., 'main_w-text_w')",
+    )
+
+    parser.add_argument(
+        "-y",
+        "--y",
+        default=None,
+        help="Y position of the overlay (can be number or FFmpeg expression, e.g., 'main_h-text_h')",
     )
 
     return parser
@@ -100,18 +127,44 @@ class ViztoolzPlugin:
             sys.exit("Error: Use either  --text or --multi-text, should be provided")
 
         output = determine_output_path(args.main_video, args.output)
-        clip, fps = add_text_to_video(
-            args.main_video,
-            args.text,
-            args.start_time,
-            args.end_time,
-            args.position,
-            args.fontsize,
-            args.padding,
-            args.duration,
-            args.multi_text,
-        )
-        write_file(clip, output, fps)
+        try:
+            start_time = convert_to_seconds(args.start_time)
+            end_time = (
+                convert_to_seconds(args.end_time) if args.end_time is not None else None
+            )
+        except ValueError as e:
+            sys.exit(f"Invalid time format: {e}")
+
+        if args.use_moviepy:
+            clip, fps = add_text_to_video(
+                args.main_video,
+                args.text,
+                start_time,
+                end_time,
+                args.position,
+                args.fontsize,
+                args.padding,
+                args.duration,
+                args.multi_text,
+            )
+            write_file(clip, output, fps)
+        else:
+            add_text_to_video_ffmpeg(
+                input_video_path=args.main_video,
+                output_video_path=output,
+                text=args.text,
+                start_time=start_time,
+                end_time=end_time,
+                position=args.position,
+                fontsize=args.fontsize,
+                padding=args.padding,
+                duration=args.duration,
+                multitexts=args.multi_text,
+                sticker_text=True,
+                stroke_width=4,
+                x=args.x,
+                y=args.y,
+            )
 
     def hello(self, args):
         # this routine will be called when "vidtoolz "addtext is called."
