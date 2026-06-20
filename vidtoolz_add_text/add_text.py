@@ -340,4 +340,4 @@ def add_text_to_video_ffmpeg(
     try:
         subprocess.run(cmd, check=True)
     except subprocess.CalledProcessError as e:
-        sys.exit(f"FFmpeg failed: {e.stderr}")
+        sys.exit(f"FFmpeg failed: {str(e)}")
