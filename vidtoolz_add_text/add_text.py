@@ -3,6 +3,45 @@ from moviepy import VideoFileClip, TextClip, CompositeVideoClip, vfx
 from pathlib import Path
 from moviepy.tools import convert_to_seconds
 
+import subprocess
+
+
+# Ensure FFmpeg is available
+def ensure_ffmpeg_available():
+    """
+    Ensure FFmpeg is available by checking if it's in the system path,
+    and if not, use static-ffmpeg as fallback.
+    """
+    try:
+        # Check if ffmpeg is already available in the system
+        subprocess.run(
+            ["ffmpeg", "-version"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=True,
+        )
+        return True
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        try:
+            # Try to use static-ffmpeg as fallback
+            import static_ffmpeg
+
+            static_ffmpeg.add_paths()
+
+            # Verify it worked
+            subprocess.run(
+                ["ffmpeg", "-version"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                check=True,
+            )
+            return True
+        except Exception as e:
+            sys.exit(
+                f"Error: FFmpeg is not available and static-ffmpeg fallback failed: {e}"
+            )
+
+
 POSITION_MAP = {
     "top-left": ("left", "top"),
     "top-right": ("right", "top"),
@@ -36,7 +75,6 @@ def make_text_clip(
     pos_tuple=("center", "bottom"),
     textcolor="white",
 ):
-
     if font is None:
         here = os.path.dirname(__file__)
         font = os.path.join(here, "fonts", "SEASRN.ttf")
@@ -114,7 +152,12 @@ def add_text_to_video(
     if multitexts:
         for mtext, mstart, mduration in parse_multitext_args(multitexts):
             txt_clip = make_text_clip(
-                mtext, mstart, mduration, fontsize=fontsize, padding=padding, pos_tuple=pos_tuple
+                mtext,
+                mstart,
+                mduration,
+                fontsize=fontsize,
+                padding=padding,
+                pos_tuple=pos_tuple,
             )
             clips.append(txt_clip)
 
@@ -141,3 +184,160 @@ def write_file(video_with_text, output_video_path, fps):
     except Exception as e:
         sys.exit("Error writing video file: " + str(e))
     video_with_text.close()
+
+
+POSITION_MAP_FFMPEG = {
+    "top-left": ("10", "10"),
+    "top-right": ("w-text_w-10", "10"),
+    "bottom-left": ("10", "h-text_h-10"),
+    "bottom-right": ("w-text_w-10", "h-text_h-10"),
+    "center": ("(w-text_w)/2", "(h-text_h)/2"),
+    "bottom": ("(w-text_w)/2", "h-text_h-50"),
+}
+
+
+def _alpha_expr(start, duration, fade=0.5):
+    end = start + duration
+    return (
+        f"if(lt(t,{start}),0,"
+        f" if(lt(t,{start+fade}),(t-{start})/{fade},"
+        f"  if(lt(t,{end-fade}),1,"
+        f"   if(lt(t,{end}),({end}-t)/{fade},0))))"
+    )
+
+
+def _drawtext(
+    text,
+    start,
+    duration,
+    font,
+    fontsize,
+    padding,
+    pos,
+    textcolor,
+    stroke_width,
+    x=None,
+    y=None,
+):
+    default_x, default_y = POSITION_MAP_FFMPEG[pos]
+    # Only override missing values
+    if x is None:
+        x = default_x
+
+    if y is None:
+        y = default_y
+
+    alpha = _alpha_expr(start, duration)
+
+    return (
+        "drawtext="
+        f"text='{text}':"
+        f"fontfile='{font}':"
+        f"fontsize={fontsize}:"
+        f"fontcolor={textcolor}:"
+        f"borderw={stroke_width}:"
+        f"bordercolor=black:"
+        f"x='{x}':y='{y}':"
+        f"alpha='{alpha}'"
+    )
+
+
+def add_text_to_video_ffmpeg(
+    input_video_path,
+    output_video_path,
+    text,
+    start_time,
+    end_time=None,
+    position="bottom",
+    fontsize=50,
+    padding=50,
+    duration=4,
+    multitexts=None,
+    sticker_text=False,
+    stroke_width=None,
+    font=None,
+    textcolor="white",
+    x=None,
+    y=None,
+):
+    """
+    FFmpeg replacement for MoviePy add_text_to_video()
+    """
+
+    # Ensure FFmpeg is available
+    ensure_ffmpeg_available()
+
+    input_video_path = Path(input_video_path)
+    if not input_video_path.exists():
+        raise FileNotFoundError(input_video_path)
+
+    if end_time is None:
+        end_time = start_time + duration
+
+    if font is None:
+        font = Path(__file__).parent / "fonts" / "SEASRN.ttf"
+
+    if stroke_width is None:
+        stroke_width = 10 if sticker_text else 2
+
+    filters = []
+
+    # main text
+    if text:
+        filters.append(
+            _drawtext(
+                text=text,
+                start=start_time,
+                duration=end_time - start_time,
+                font=font,
+                fontsize=fontsize,
+                padding=padding,
+                pos=position,
+                textcolor=textcolor,
+                stroke_width=stroke_width,
+                x=x,
+                y=y,
+            )
+        )
+
+    # multitext
+    if multitexts:
+        parsed_multitexts = parse_multitext_args(multitexts)
+        for txt, start, dur in parsed_multitexts:
+            filters.append(
+                _drawtext(
+                    text=txt,
+                    start=start,
+                    duration=dur,
+                    font=font,
+                    fontsize=fontsize,
+                    padding=padding,
+                    pos=position,
+                    textcolor=textcolor,
+                    stroke_width=stroke_width,
+                    x=x,
+                    y=y,
+                )
+            )
+
+    vf = ",".join(filters)
+
+    cmd = [
+        "ffmpeg",
+        "-y",
+        "-i",
+        str(input_video_path),
+        "-vf",
+        vf,
+        "-c:v",
+        "libx264",
+        "-preset",
+        "veryfast",
+        "-c:a",
+        "copy",
+        str(output_video_path),
+    ]
+    try:
+        subprocess.run(cmd, check=True)
+    except subprocess.CalledProcessError as e:
+        sys.exit(f"FFmpeg failed: {str(e)}")
